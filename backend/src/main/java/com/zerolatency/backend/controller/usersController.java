@@ -18,13 +18,13 @@ public class usersController {
     @Autowired
     private usersService userService;
 
-    @GetMapping("/test")
-    public users findByUsername(@RequestParam String username, @RequestParam String dummy) {
+    @GetMapping
+    public users findByUsername(@RequestParam String username) {
         return userService.findByUsername(username);
     }
 
-    @PostMapping("/test")
-    public users findByUsername(@RequestBody usernameRequest user) {
+    @PostMapping
+    public users findByUsernameFromBody(@RequestBody usernameRequest user) {
         return userService.findByUsername(user.getUsername());
     }
 }
