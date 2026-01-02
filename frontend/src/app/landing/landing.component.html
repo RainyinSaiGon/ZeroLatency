@@ -110,7 +110,7 @@
             <div class="phone-frame">
                 <div class="phone-notch"></div>
                 <div class="phone-screen">
-                    <div class="phone-time">9:41</div>
+                    <div class="phone-time">{{ currentTime }}</div>
                     <div class="phone-content">
                         <div class="phone-logo">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -119,6 +119,18 @@
                         </div>
                         <span class="phone-brand">Zero Latency</span>
                         <span class="phone-tagline">Developer Forum</span>
+                        
+                        <!-- Mock Notifications -->
+                        <div class="phone-notifications">
+                            <div class="phone-notification" [class.notification-visible]="showNotification">
+                                <div class="notification-avatar">{{ currentNotification.avatar }}</div>
+                                <div class="notification-content">
+                                    <span class="notification-user">{{ currentNotification.user }}</span>
+                                    <span class="notification-action">{{ currentNotification.action }}</span>
+                                </div>
+                                <span class="notification-time">{{ currentNotification.time }}</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -13,6 +13,18 @@ export class LandingComponent implements OnInit, OnDestroy {
     currentYear = new Date().getFullYear();
     isDarkMode = false;
 
+    // Real-time clock
+    currentTime = '9:41';
+
+    // Mock notifications
+    notifications = [
+        { user: 'Alex K.', action: 'replied to your post', time: 'just now', avatar: 'AK' },
+        { user: 'Sarah M.', action: 'upvoted your answer', time: '2m ago', avatar: 'SM' },
+        { user: 'DevOps Dan', action: 'mentioned you', time: '5m ago', avatar: 'DD' },
+    ];
+    currentNotificationIndex = 0;
+    showNotification = true;
+
     // Animated counters - start with base values to avoid showing 0
     discussionCount = 10000;
     memberCount = 10000;
@@ -23,6 +35,8 @@ export class LandingComponent implements OnInit, OnDestroy {
     private targetSolutions = 8920;
     private animationDuration = 2000;
     private counterInterval: any;
+    private clockInterval: any;
+    private notificationInterval: any;
     private isBrowser: boolean;
 
     constructor(@Inject(PLATFORM_ID) platformId: Object) {
@@ -38,6 +52,13 @@ export class LandingComponent implements OnInit, OnDestroy {
                 document.documentElement.classList.add('dark-mode');
             }
 
+            // Start real-time clock
+            this.updateClock();
+            this.clockInterval = setInterval(() => this.updateClock(), 1000);
+
+            // Start notification rotation
+            this.notificationInterval = setInterval(() => this.rotateNotification(), 4000);
+
             // Start counter animation after a short delay
             setTimeout(() => this.animateCounters(), 500);
 
@@ -50,6 +71,31 @@ export class LandingComponent implements OnInit, OnDestroy {
         if (this.counterInterval) {
             clearInterval(this.counterInterval);
         }
+        if (this.clockInterval) {
+            clearInterval(this.clockInterval);
+        }
+        if (this.notificationInterval) {
+            clearInterval(this.notificationInterval);
+        }
+    }
+
+    private updateClock() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        this.currentTime = `${hours}:${minutes}`;
+    }
+
+    private rotateNotification() {
+        this.showNotification = false;
+        setTimeout(() => {
+            this.currentNotificationIndex = (this.currentNotificationIndex + 1) % this.notifications.length;
+            this.showNotification = true;
+        }, 300);
+    }
+
+    get currentNotification() {
+        return this.notifications[this.currentNotificationIndex];
     }
 
     toggleDarkMode() {

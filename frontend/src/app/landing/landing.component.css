@@ -545,6 +545,77 @@
     color: var(--text-primary);
 }
 
+.phone-tagline {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: -0.5rem;
+}
+
+/* Phone Notifications */
+.phone-notifications {
+    margin-top: 1.5rem;
+    width: 100%;
+    padding: 0 12px;
+}
+
+.phone-notification {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #F1F5F9;
+    border-radius: 10px;
+    padding: 10px 12px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+}
+
+.phone-notification.notification-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.notification-avatar {
+    width: 28px;
+    height: 28px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.notification-user {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.notification-action {
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-time {
+    font-size: 0.55rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
 /* ===== Trust Section ===== */
 .trust-section {
     padding: 4rem 2rem;

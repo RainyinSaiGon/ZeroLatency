@@ -1,0 +1,115 @@
+# Frontend CI Pipeline with Angular Tests & Discord Notifications
+# Triggers on push/PR to main branch
+
+name: Frontend CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'frontend/**'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'frontend/**'
+
+jobs:
+  # ==================== BUILD & TEST ====================
+  test:
+    name: Build & Test Frontend
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm run test -- --run
+
+    - name: Build application
+      run: npm run build
+
+  # ==================== DISCORD NOTIFICATIONS ====================
+  notify-success:
+    name: Notify Success
+    runs-on: ubuntu-latest
+    needs: test
+    if: success() && github.event_name == 'push'
+
+    steps:
+    - name: Discord Success Notification
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        status: success
+        title: "Frontend Tests Passed!"
+        description: |
+          **Repository:** ${{ github.repository }}
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** `${{ github.sha }}`
+          **Author:** ${{ github.actor }}
+          
+          All frontend tests passed successfully!
+        color: 0x00ff00
+        username: GitHub Actions
+        avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+
+  notify-failure:
+    name: Notify Failure
+    runs-on: ubuntu-latest
+    needs: test
+    if: failure()
+
+    steps:
+    - name: Discord Failure Notification
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        status: failure
+        title: "Frontend Tests Failed!"
+        description: |
+          **Repository:** ${{ github.repository }}
+          **Branch:** ${{ github.ref_name }}
+          **Commit:** `${{ github.sha }}`
+          **Author:** ${{ github.actor }}
+          
+          Check the [Actions tab](${{ github.server_url }}/${{ github.repository }}/actions) for details.
+        color: 0xff0000
+        username: GitHub Actions
+        avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+
+  # Notify on PR builds
+  notify-pr:
+    name: Notify PR Status
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+
+    steps:
+    - name: Discord PR Notification
+      uses: sarisia/actions-status-discord@v1
+      with:
+        webhook: ${{ secrets.DISCORD_WEBHOOK }}
+        status: ${{ needs.test.result }}
+        title: "Frontend PR Build"
+        description: |
+          **PR:** #${{ github.event.pull_request.number }}
+          **Title:** ${{ github.event.pull_request.title }}
+          **Author:** ${{ github.actor }}
+          **Status:** ${{ needs.test.result == 'success' && 'Tests Passed' || 'Tests Failed' }}
+        username: GitHub Actions
+        avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
