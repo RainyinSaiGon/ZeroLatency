@@ -1,3 +1,4 @@
+select * fr
 CREATE OR REPLACE FUNCTION create_info_after_user_insert()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -20,3 +21,4 @@ AFTER INSERT ON users
 FOR EACH ROW
 EXECUTE FUNCTION create_info_after_user_insert();
 
+select * f

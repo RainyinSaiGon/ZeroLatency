@@ -1,4 +1,4 @@
-package com.zerolatency.backend.dto;
+package com.zerolatency.backend.dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

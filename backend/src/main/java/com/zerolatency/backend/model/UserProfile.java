@@ -1,5 +1,7 @@
 package com.zerolatency.backend.model;
 
+import java.util.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -40,5 +42,7 @@ public class UserProfile {
     private String currentLocation;
     private String hometown;
     private String occupation;
+    private Date birthday;
+    private String gender;
 }
     

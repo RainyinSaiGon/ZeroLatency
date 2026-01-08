@@ -1,4 +1,4 @@
-package com.zerolatency.backend.dto;
+package com.zerolatency.backend.dto.Response;
 
 import com.zerolatency.backend.model.UserDestination;
 import com.zerolatency.backend.model.UserProfile;
