@@ -1,4 +1,5 @@
-select * fr
+select * from users
+
 CREATE OR REPLACE FUNCTION create_info_after_user_insert()
 RETURNS TRIGGER AS $$
 BEGIN

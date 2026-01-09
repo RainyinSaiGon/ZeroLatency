@@ -6,12 +6,18 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.zerolatency.backend.dto.Response.fullInfoResponse;
+import com.zerolatency.backend.dto.Response.DestinationResponse;
+import com.zerolatency.backend.dto.Response.FullInformationResponse;
+import com.zerolatency.backend.dto.Response.ProfileResponse;
+import com.zerolatency.backend.dto.Response.UserResponse;
+import com.zerolatency.backend.dto.Response.WebsiteResponse;
 import com.zerolatency.backend.model.UserDestination;
 import com.zerolatency.backend.model.UserProfile;
 import com.zerolatency.backend.model.UserWebsite;
+import com.zerolatency.backend.model.Users;
 import com.zerolatency.backend.repo.destinationJpaRepo;
 import com.zerolatency.backend.repo.profileJpaRepo;
+import com.zerolatency.backend.repo.usersRepo;
 import com.zerolatency.backend.repo.websiteJpaRepo;
 
 @Service
@@ -19,6 +25,7 @@ public class informationService {
     @Autowired profileJpaRepo profileJpaRepo;
     @Autowired websiteJpaRepo websiteJpaRepo;
     @Autowired destinationJpaRepo destinationJpaRepo;
+    @Autowired usersRepo usersRepo;
 
     public Optional<UserProfile> getProfileByUserId(Long userId) {
         return Optional.ofNullable(profileJpaRepo.findByUser_UserId(userId));
@@ -32,16 +39,52 @@ public class informationService {
         return Optional.ofNullable(destinationJpaRepo.findByUser_UserId(userId));
     }
 
-    public Optional<fullInfoResponse> getFullInfoByUserId(Long userId) {
+    public Optional<FullInformationResponse> getFullInfoByUserId(Long userId) {
+        Optional<Users> userOpt = Optional.ofNullable(usersRepo.findByUserId(userId));
+
+        if (userOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        
         Optional<UserProfile> profileOpt = getProfileByUserId(userId);
         Optional<UserWebsite> websiteOpt = getWebsiteByUserId(userId);
         Optional<UserDestination> destinationOpt = getDestinationByUserId(userId);
 
-        if (profileOpt.isPresent() || websiteOpt.isPresent() || destinationOpt.isPresent()) {
-            fullInfoResponse fullInfo = new fullInfoResponse();
-            profileOpt.ifPresent(fullInfo::setProfile);
-            websiteOpt.ifPresent(fullInfo::setWebsite);
-            destinationOpt.ifPresent(fullInfo::setDestination);
+        if (profileOpt.isPresent() || websiteOpt.isPresent() || destinationOpt.isPresent() || userOpt.isPresent()) {
+            FullInformationResponse fullInfo = new FullInformationResponse();
+            UserResponse userResponse = new UserResponse(userOpt.get().getUserId(), userOpt.get().getUsername(), userOpt.get().getRole());
+            DestinationResponse destinationResponse = destinationOpt.map(dest -> new DestinationResponse(
+                dest.getKindergarten(),
+                dest.getPrimarySchool(),
+                dest.getMiddleSchool(),
+                dest.getHighSchool(),
+                dest.getCollegeUniversity()
+            )).orElse(null);
+            ProfileResponse profileResponse = profileOpt.map(profile -> new ProfileResponse(
+                profile.getFirstName(),
+                profile.getLastName(),
+                profile.getBio(),
+                profile.getCurrentLocation(),
+                profile.getHometown(),
+                profile.getOccupation(),
+                profile.getBirthday(),
+                profile.getGender(),
+                profile.getAvatarUrl()
+            )).orElse(null);
+            WebsiteResponse websiteResponse = websiteOpt.map(website -> new WebsiteResponse(
+                website.getGithub(),
+                website.getLinkedin(),
+                website.getPortfolio(),
+                website.getTwitter(),
+                website.getFacebook(),
+                website.getInstagram()
+            )).orElse(null);
+            
+            fullInfo.setUser(userResponse);
+            fullInfo.setProfile(profileResponse);
+            fullInfo.setWebsite(websiteResponse);
+            fullInfo.setDestination(destinationResponse);
+
             return Optional.of(fullInfo);
         }
         return Optional.empty();
