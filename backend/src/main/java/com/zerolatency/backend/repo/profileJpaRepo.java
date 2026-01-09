@@ -32,4 +32,12 @@ public interface profileJpaRepo extends JpaRepository<UserProfile, Long>{
     int updateProfileByUser_UserId
         (Long userId, String firstName, String lastName, String currentLocation, String hometown, String occupation, String bio, Date birthday, String gender);
         
+    @Modifying
+    @Transactional
+    @Query("""
+        UPDATE UserProfile up 
+        SET up.avatarUrl = ?2
+        WHERE up.user.userId = ?1
+            """)
+    int updateAvatarUrlByUser_UserId(Long userId, String avatarUrl);
 }
