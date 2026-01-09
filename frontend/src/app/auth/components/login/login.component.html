@@ -19,11 +19,29 @@
         <h1>Where architects and engineers connect</h1>
         <p>Join the community discussing distributed systems, microservices, and scalable architecture. Learn from
           real-world experience.</p>
-        <div class="topic-list">
-          <span class="topic-tag">System Design</span>
-          <span class="topic-tag">Kafka</span>
-          <span class="topic-tag">Kubernetes</span>
-          <span class="topic-tag">Event Sourcing</span>
+
+        <!-- Testimonial Carousel -->
+        <div class="testimonial-carousel">
+          <div class="testimonial-card" (click)="nextTestimonial()" style="cursor: pointer;">
+            <div class="testimonial-quote">
+              <svg class="quote-icon" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z" />
+              </svg>
+              <p>{{ currentTestimonial.quote }}</p>
+            </div>
+            <div class="testimonial-author">
+              <div class="author-avatar">{{ currentTestimonial.avatar }}</div>
+              <div class="author-info">
+                <span class="author-name">{{ currentTestimonial.author }}</span>
+                <span class="author-role">{{ currentTestimonial.role }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-dots">
+            <button *ngFor="let t of testimonials; let i = index" class="dot"
+              [class.active]="i === currentTestimonialIndex" (click)="goToTestimonial(i)">
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -19,6 +19,25 @@ export class RegisterComponent implements OnInit {
     showConfirmPassword = false;
     private isBrowser: boolean;
 
+    // Feature highlights for left panel
+    features = [
+        {
+            icon: 'discussions',
+            title: 'Active Discussions',
+            description: 'Join 12K+ conversations on system design and architecture'
+        },
+        {
+            icon: 'experts',
+            title: 'Expert Community',
+            description: 'Learn from engineers at top tech companies'
+        },
+        {
+            icon: 'resources',
+            title: 'Premium Resources',
+            description: 'Access curated guides, case studies, and tutorials'
+        }
+    ];
+
     constructor(
         private fb: FormBuilder,
         private router: Router,
@@ -44,6 +63,26 @@ export class RegisterComponent implements OnInit {
             confirmPassword.setErrors({ passwordMismatch: true });
         }
         return null;
+    }
+
+    // Password strength calculation
+    get passwordStrength(): { level: string; percent: number; color: string } {
+        const password = this.form.get('password')?.value || '';
+        let score = 0;
+
+        if (password.length >= 8) score++;
+        if (password.length >= 12) score++;
+        if (/[A-Z]/.test(password)) score++;
+        if (/[0-9]/.test(password)) score++;
+        if (/[^A-Za-z0-9]/.test(password)) score++;
+
+        if (score <= 2) {
+            return { level: 'Weak', percent: 33, color: '#EF4444' };
+        } else if (score <= 3) {
+            return { level: 'Medium', percent: 66, color: '#F59E0B' };
+        } else {
+            return { level: 'Strong', percent: 100, color: '#10B981' };
+        }
     }
 
     togglePasswordVisibility(field: 'password' | 'confirm'): void {
