@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question or Discussion
+    url: https://github.com/RainyinSaiGon/ZeroLatency/discussions
+    about: For general questions and discussions, please use GitHub Discussions
