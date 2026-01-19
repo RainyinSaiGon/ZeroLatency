@@ -43,6 +43,22 @@ public class users {
     private String profilePicture;
     private Boolean enabled = true;
 
+    @Column(name = "email_verified")
+    private Boolean emailVerified = false;
+
+    @Column(name = "email_verification_token")
+    private String emailVerificationToken;
+
+    // 2FA fields
+    @Column(name = "two_factor_enabled")
+    private Boolean twoFactorEnabled = false;
+
+    @Column(name = "two_factor_secret")
+    private String twoFactorSecret;
+
+    @Column(name = "backup_codes", columnDefinition = "TEXT")
+    private String backupCodes; // JSON array stored as string
+
     @Column(name = "created_at")
     private LocalDate createdAt = LocalDate.now();
 }

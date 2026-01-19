@@ -29,6 +29,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./auth/components/oauth2-callback/oauth2-callback.component').then((m) => m.OAuth2CallbackComponent),
       },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./auth/components/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent),
+      },
+      {
+        path: 'reset-password/:token',
+        loadComponent: () =>
+          import('./auth/components/reset-password/reset-password.component').then((m) => m.ResetPasswordComponent),
+      },
+      {
+        path: 'verify-email',
+        loadComponent: () =>
+          import('./auth/components/verify-email/verify-email.component').then((m) => m.VerifyEmailComponent),
+      },
     ],
   },
 

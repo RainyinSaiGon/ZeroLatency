@@ -77,17 +77,10 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     if (this.isBrowser) {
-      // Show skeleton briefly then reveal form
-      setTimeout(() => {
-        this.isLoading = false;
-      }, 800);
-
       // Start testimonial rotation
       this.testimonialInterval = setInterval(() => {
         this.nextTestimonial();
       }, 5000);
-    } else {
-      this.isLoading = false;
     }
   }
 
@@ -122,6 +115,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     this.isSubmitting = true;
+    this.isLoading = true; // Show skeleton during submission
     this.errorMessage = null;
 
     const { username, password, rememberMe } = this.form.value;
@@ -133,6 +127,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
         // Show success animation
         this.showSuccess = true;
+        this.isLoading = false;
 
         // Store remember me preference
         if (rememberMe) {
@@ -148,6 +143,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         console.error('Login error:', err);
         this.errorMessage = err.error?.message || 'Invalid username or password';
         this.isSubmitting = false;
+        this.isLoading = false; // Hide skeleton on error
       },
     });
   }

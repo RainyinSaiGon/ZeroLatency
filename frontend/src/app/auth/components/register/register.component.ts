@@ -14,6 +14,7 @@ import { AuthService } from '../../services/auth.service';
 export class RegisterComponent implements OnInit {
     form!: FormGroup;
     isSubmitting = false;
+    isLoading = false; // Skeleton loading during submission
     showSuccess = false;
     errorMessage: string | null = null;
     showPassword = false;
@@ -101,6 +102,7 @@ export class RegisterComponent implements OnInit {
         }
 
         this.isSubmitting = true;
+        this.isLoading = true; // Show skeleton during submission
         this.errorMessage = null;
 
         const { username, email, password } = this.form.value;
@@ -110,6 +112,7 @@ export class RegisterComponent implements OnInit {
             next: (response) => {
                 console.log('Registration successful:', response);
                 this.showSuccess = true;
+                this.isLoading = false;
 
                 // Redirect to dashboard after success (user is auto-logged in)
                 setTimeout(() => {
@@ -120,6 +123,7 @@ export class RegisterComponent implements OnInit {
                 console.error('Registration error:', err);
                 this.errorMessage = err.error?.message || 'Registration failed. Please try again.';
                 this.isSubmitting = false;
+                this.isLoading = false; // Hide skeleton on error
             }
         });
     }
