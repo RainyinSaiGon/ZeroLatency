@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { BehaviorSubject, Observable, tap } from "rxjs";
-import { AuthResponse, LoginRequest } from "../auth.model";
+import { AuthResponse, LoginRequest, RegisterRequest } from "../auth.model";
 import { HttpClient } from "@angular/common/http";
+import { Router } from "@angular/router";
 
 @Injectable({
     providedIn: "root"
@@ -9,26 +10,72 @@ import { HttpClient } from "@angular/common/http";
 export class AuthService {
     private apiURL = 'http://localhost:8080/api/users';
 
-    private currentUserSubject = new BehaviorSubject<any> (this.getUserFromStorage());
+    private currentUserSubject = new BehaviorSubject<any>(this.getUserFromStorage());
     public currentUser$ = this.currentUserSubject.asObservable();
 
-    private isAuthenticatedSubject = new BehaviorSubject<boolean> (!!this.getToken());
+    private isAuthenticatedSubject = new BehaviorSubject<boolean>(!!this.getToken());
     public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient, private router: Router) { }
 
 
     login(username: string, password: string): Observable<AuthResponse> {
-        const credentials : LoginRequest = {username, password};
+        const credentials: LoginRequest = { username, password };
         return this.http.post<AuthResponse>(`${this.apiURL}/login`, credentials).pipe(
             tap((response) => {
-                    this.setCurrentUser(response.user);
-                    this.setToken(response.token);
-                    this.currentUserSubject.next(response.user);
-                    this.isAuthenticatedSubject.next(true);
-                }
+                this.setCurrentUser(response.user);
+                this.setToken(response.token, response.expiresAt);
+                this.currentUserSubject.next(response.user);
+                this.isAuthenticatedSubject.next(true);
+            }
             )
+        );
+    }
+
+    register(username: string, email: string, password: string): Observable<AuthResponse> {
+        const request: RegisterRequest = { username, email, password };
+        return this.http.post<AuthResponse>(`${this.apiURL}/register`, request).pipe(
+            tap((response) => {
+                this.setCurrentUser(response.user);
+                this.setToken(response.token, response.expiresAt);
+                this.currentUserSubject.next(response.user);
+                this.isAuthenticatedSubject.next(true);
+            }
+            )
+        );
+    }
+
+    loginWithGoogle(): void {
+        // Redirect to backend OAuth2 endpoint
+        window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    }
+
+    loginWithGitHub(): void {
+        // Redirect to backend OAuth2 endpoint
+        window.location.href = 'http://localhost:8080/oauth2/authorization/github';
+    }
+
+    handleOAuthCallback(token: string, expiresAt: number): void {
+        // Store token and expiration
+        this.setToken(token, expiresAt);
+
+        // Fetch user info (you might want to decode JWT or call /me endpoint)
+        // For now, just mark as authenticated
+        this.isAuthenticatedSubject.next(true);
+
+        // Redirect to dashboard
+        this.router.navigate(['/dashboard']);
+    }
+
+    refreshToken(): Observable<AuthResponse> {
+        return this.http.post<AuthResponse>(`${this.apiURL}/refresh`, {}).pipe(
+            tap((response) => {
+                this.setToken(response.token, response.expiresAt);
+                this.setCurrentUser(response.user);
+                this.currentUserSubject.next(response.user);
+                this.isAuthenticatedSubject.next(true);
+            })
         );
     }
 
@@ -41,7 +88,17 @@ export class AuthService {
     }
 
     isAuthenticated(): boolean {
-        return !!this.getToken();
+        const token = this.getToken();
+        if (!token) return false;
+
+        // Check if token is expired
+        const expiresAt = this.getTokenExpiration();
+        if (expiresAt && Date.now() > expiresAt) {
+            this.logout();
+            return false;
+        }
+
+        return true;
     }
 
     getToken(): string | null {
@@ -49,14 +106,24 @@ export class AuthService {
         return localStorage.getItem('authToken')
     }
 
-    setToken(token: string): void {
+    getTokenExpiration(): number | null {
+        if (typeof window === 'undefined') return null;
+        const expiresAt = localStorage.getItem('tokenExpiration');
+        return expiresAt ? parseInt(expiresAt) : null;
+    }
+
+    setToken(token: string, expiresAt?: number): void {
         if (typeof window === 'undefined') return;
         localStorage.setItem('authToken', token);
+        if (expiresAt) {
+            localStorage.setItem('tokenExpiration', expiresAt.toString());
+        }
     }
 
     private removeToken(): void {
         if (typeof window === 'undefined') return;
         localStorage.removeItem('authToken');
+        localStorage.removeItem('tokenExpiration');
     }
 
     private setCurrentUser(user: any): void {

@@ -2,6 +2,7 @@ import { Component, OnInit, Inject, PLATFORM_ID } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
     selector: 'app-register',
@@ -41,6 +42,7 @@ export class RegisterComponent implements OnInit {
     constructor(
         private fb: FormBuilder,
         private router: Router,
+        private authService: AuthService,
         @Inject(PLATFORM_ID) platformId: Object
     ) {
         this.isBrowser = isPlatformBrowser(platformId);
@@ -101,25 +103,34 @@ export class RegisterComponent implements OnInit {
         this.isSubmitting = true;
         this.errorMessage = null;
 
-        // Simulate registration API call
-        setTimeout(() => {
-            console.log('Registration data:', this.form.value);
-            this.showSuccess = true;
+        const { username, email, password } = this.form.value;
 
-            // Redirect to login after success
-            setTimeout(() => {
-                this.router.navigate(['/auth/login']);
-            }, 2000);
-        }, 1500);
+        // Call backend registration API
+        this.authService.register(username, email, password).subscribe({
+            next: (response) => {
+                console.log('Registration successful:', response);
+                this.showSuccess = true;
+
+                // Redirect to dashboard after success (user is auto-logged in)
+                setTimeout(() => {
+                    this.router.navigate(['/dashboard']);
+                }, 2000);
+            },
+            error: (err) => {
+                console.error('Registration error:', err);
+                this.errorMessage = err.error?.message || 'Registration failed. Please try again.';
+                this.isSubmitting = false;
+            }
+        });
     }
 
     // OAuth methods
     registerWithGitHub(): void {
-        console.log('GitHub OAuth registration');
+        this.authService.loginWithGitHub();
     }
 
     registerWithGoogle(): void {
-        console.log('Google OAuth registration');
+        this.authService.loginWithGoogle();
     }
 
     // Form getters

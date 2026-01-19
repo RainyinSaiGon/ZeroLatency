@@ -66,6 +66,16 @@ export class LoginComponent implements OnInit, OnDestroy {
     // Get redirect URL from route params 
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
 
+    // Check for OAuth callback
+    const token = this.route.snapshot.queryParams['token'];
+    const expiresAt = this.route.snapshot.queryParams['expiresAt'];
+
+    if (token && expiresAt) {
+      // Handle OAuth callback
+      this.authService.handleOAuthCallback(token, parseInt(expiresAt));
+      return; // Skip the rest of initialization
+    }
+
     if (this.isBrowser) {
       // Show skeleton briefly then reveal form
       setTimeout(() => {
@@ -142,15 +152,13 @@ export class LoginComponent implements OnInit, OnDestroy {
     });
   }
 
-  // OAuth login methods (placeholder - would connect to actual OAuth)
+  // OAuth login methods
   loginWithGitHub(): void {
-    console.log('GitHub OAuth initiated');
-    // Would redirect to GitHub OAuth
+    this.authService.loginWithGitHub();
   }
 
   loginWithGoogle(): void {
-    console.log('Google OAuth initiated');
-    // Would redirect to Google OAuth
+    this.authService.loginWithGoogle();
   }
 
   // Helper getters for template

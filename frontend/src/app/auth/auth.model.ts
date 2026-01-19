@@ -3,15 +3,27 @@ export interface LoginRequest {
     password: string;
 }
 
+export interface RegisterRequest {
+    username: string;
+    email: string;
+    password: string;
+}
+
 export interface AuthResponse {
     token: string;
+    tokenType: string;
+    expiresAt: number;
     user: {
-        id: string;
+        user_id: number;
         username: string;
+        email: string;
+        role: string;
+        provider: string;
+        profilePicture?: string;
     };
 }
 
 export interface AuthToken {
     token: string;
-    expiresAt ?: number;
+    expiresAt?: number;
 }
