@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
   styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent {
-  
+
 
   currentUser$: Observable<{ id: string; username: string } | null>;
 
@@ -23,5 +23,14 @@ export class DashboardComponent {
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/auth/login']);
+  }
+
+  getInitials(username: string): string {
+    if (!username) return '?';
+    const parts = username.split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return username.substring(0, 2).toUpperCase();
   }
 }

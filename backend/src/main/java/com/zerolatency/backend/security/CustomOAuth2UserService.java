@@ -17,7 +17,7 @@ import com.zerolatency.backend.repo.usersRepo;
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Autowired
-    private usersRepo userRepository;
+    private usersRepo userRepository;   
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
