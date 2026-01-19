@@ -5,10 +5,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.zerolatency.backend.model.AuthProvider;
-import com.zerolatency.backend.model.users;
+import com.zerolatency.backend.model.User;
 import com.zerolatency.backend.model.PasswordResetToken;
 import com.zerolatency.backend.model.EmailVerificationToken;
-import com.zerolatency.backend.repo.usersRepo;
+import com.zerolatency.backend.repo.UserRepo;
 import com.zerolatency.backend.repo.PasswordResetTokenRepo;
 import com.zerolatency.backend.repo.EmailVerificationTokenRepo;
 import com.zerolatency.backend.security.JwtUtil;
@@ -19,9 +19,9 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-public class usersService {
+public class UserService {
     @Autowired
-    private usersRepo userRepo;
+    private UserRepo userRepo;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -38,32 +38,32 @@ public class usersService {
     @Autowired
     private EmailService emailService;
 
-    public users findByUsername(String username) {
+    public User findByUsername(String username) {
         return userRepo.findByUsername(username);
     }
 
-    public users findByEmail(String email) {
+    public User findByEmail(String email) {
         return userRepo.findByEmail(email);
     }
 
-    public List<users> getAllUsers() {
+    public List<User> getAllUsers() {
         return userRepo.findAll();
     }
 
-    public users saveUser(users user) {
+    public User saveUser(User user) {
         return userRepo.save(user);
     }
 
     public boolean verifyPassword(String username, String password) {
-        users user = userRepo.findByUsername(username);
+        User user = userRepo.findByUsername(username);
         if (user != null && user.getPassword() != null) {
             return passwordEncoder.matches(password, user.getPassword());
         }
         return false;
     }
 
-    public users login(String username, String password) {
-        users user = userRepo.findByUsername(username);
+    public User login(String username, String password) {
+        User user = userRepo.findByUsername(username);
         if (user != null && user.getPassword() != null &&
                 passwordEncoder.matches(password, user.getPassword())) {
             return user;
@@ -71,7 +71,7 @@ public class usersService {
         return null;
     }
 
-    public users register(String username, String email, String password) {
+    public User register(String username, String email, String password) {
         // Check if username or email already exists
         if (userRepo.existsByUsername(username)) {
             throw new RuntimeException("Username already exists");
@@ -81,7 +81,7 @@ public class usersService {
         }
 
         // Create new user
-        users user = new users();
+        User user = new User();
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(passwordEncoder.encode(password));
@@ -89,7 +89,7 @@ public class usersService {
         user.setProvider(AuthProvider.LOCAL);
         user.setEnabled(true);
 
-        users savedUser = userRepo.save(user);
+        User savedUser = userRepo.save(user);
 
         // Send verification email
         sendVerificationEmail(savedUser);
@@ -113,7 +113,7 @@ public class usersService {
         }
     }
 
-    public UserDTO toUserDTO(users user) {
+    public UserDTO toUserDTO(User user) {
         return new UserDTO(
                 user.getUserId(),
                 user.getUsername(),
@@ -125,7 +125,7 @@ public class usersService {
 
     // Password Reset Methods
     public void requestPasswordReset(String email) {
-        users user = userRepo.findByEmail(email);
+        User user = userRepo.findByEmail(email);
         if (user == null) {
             // Don't reveal if email exists or not for security
             return;
@@ -155,7 +155,7 @@ public class usersService {
         }
 
         // Update password
-        users user = resetToken.getUser();
+        User user = resetToken.getUser();
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);
 
@@ -165,7 +165,7 @@ public class usersService {
     }
 
     // Email Verification Methods
-    public void sendVerificationEmail(users user) {
+    public void sendVerificationEmail(User user) {
         // Generate verification token
         String token = UUID.randomUUID().toString();
         LocalDateTime expiresAt = LocalDateTime.now().plusHours(24);
@@ -190,7 +190,7 @@ public class usersService {
         }
 
         // Mark user as verified
-        users user = verificationToken.getUser();
+        User user = verificationToken.getUser();
         user.setEmailVerified(true);
         user.setEmailVerificationToken(null);
         userRepo.save(user);
@@ -200,7 +200,7 @@ public class usersService {
     }
 
     public void resendVerificationEmail(String email) {
-        users user = userRepo.findByEmail(email);
+        User user = userRepo.findByEmail(email);
         if (user == null) {
             throw new RuntimeException("User not found");
         }

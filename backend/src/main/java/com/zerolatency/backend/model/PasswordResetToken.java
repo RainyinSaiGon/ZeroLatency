@@ -16,7 +16,7 @@ public class PasswordResetToken {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private users user;
+    private User user;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;
@@ -32,7 +32,7 @@ public class PasswordResetToken {
         this.used = false;
     }
 
-    public PasswordResetToken(String token, users user, LocalDateTime expiresAt) {
+    public PasswordResetToken(String token, User user, LocalDateTime expiresAt) {
         this();
         this.token = token;
         this.user = user;
@@ -56,11 +56,11 @@ public class PasswordResetToken {
         this.token = token;
     }
 
-    public users getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(users user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

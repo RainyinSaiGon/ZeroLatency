@@ -5,10 +5,10 @@ import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 
 @Component({
-    selector: 'app-reset-password',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, RouterLink],
-    template: `
+  selector: 'app-reset-password',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  template: `
     <div class="reset-password-page">
       <div class="bg-pattern"></div>
       
@@ -91,7 +91,7 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     .reset-password-page {
       min-height: 100vh;
       background: linear-gradient(135deg, #F8FAFC 0%, #E2E8F0 100%);
@@ -293,73 +293,73 @@ import { Router, ActivatedRoute, RouterLink } from '@angular/router';
   `]
 })
 export class ResetPasswordComponent implements OnInit {
-    form: FormGroup;
-    isSubmitting = false;
-    resetSuccess = false;
-    invalidToken = false;
-    errorMessage: string | null = null;
-    showPassword = false;
-    showConfirmPassword = false;
-    private token: string = '';
-    private apiUrl = 'http://localhost:8080/api/users';
+  form: FormGroup;
+  isSubmitting = false;
+  resetSuccess = false;
+  invalidToken = false;
+  errorMessage: string | null = null;
+  showPassword = false;
+  showConfirmPassword = false;
+  private token: string = '';
+  private apiUrl = 'http://localhost:8080/api/users';
 
-    constructor(
-        private fb: FormBuilder,
-        private http: HttpClient,
-        private router: Router,
-        private route: ActivatedRoute
-    ) {
-        this.form = this.fb.group({
-            newPassword: ['', [Validators.required, Validators.minLength(6)]],
-            confirmPassword: ['', [Validators.required]]
-        }, { validators: this.passwordMatchValidator });
+  constructor(
+    private fb: FormBuilder,
+    private http: HttpClient,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    this.form = this.fb.group({
+      newPassword: ['', [Validators.required, Validators.minLength(6)]],
+      confirmPassword: ['', [Validators.required]]
+    }, { validators: this.passwordMatchValidator });
+  }
+
+  ngOnInit(): void {
+    this.token = this.route.snapshot.paramMap.get('token') || '';
+    if (!this.token) {
+      this.invalidToken = true;
     }
+  }
 
-    ngOnInit(): void {
-        this.token = this.route.snapshot.paramMap.get('token') || '';
-        if (!this.token) {
-            this.invalidToken = true;
+  passwordMatchValidator(form: FormGroup) {
+    const password = form.get('newPassword');
+    const confirmPassword = form.get('confirmPassword');
+    if (password && confirmPassword && password.value !== confirmPassword.value) {
+      return { passwordMismatch: true };
+    }
+    return null;
+  }
+
+  get newPassword() {
+    return this.form.get('newPassword');
+  }
+
+  get confirmPassword() {
+    return this.form.get('confirmPassword');
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) return;
+
+    this.isSubmitting = true;
+    this.errorMessage = null;
+
+    this.http.post(`${this.apiUrl}/reset-password`, {
+      token: this.token,
+      newPassword: this.form.value.newPassword
+    }).subscribe({
+      next: () => {
+        this.resetSuccess = true;
+        this.isSubmitting = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'An error occurred. Please try again.';
+        if (this.errorMessage && (this.errorMessage.includes('Invalid') || this.errorMessage.includes('expired'))) {
+          this.invalidToken = true;
         }
-    }
-
-    passwordMatchValidator(form: FormGroup) {
-        const password = form.get('newPassword');
-        const confirmPassword = form.get('confirmPassword');
-        if (password && confirmPassword && password.value !== confirmPassword.value) {
-            return { passwordMismatch: true };
-        }
-        return null;
-    }
-
-    get newPassword() {
-        return this.form.get('newPassword');
-    }
-
-    get confirmPassword() {
-        return this.form.get('confirmPassword');
-    }
-
-    onSubmit(): void {
-        if (this.form.invalid) return;
-
-        this.isSubmitting = true;
-        this.errorMessage = null;
-
-        this.http.post(`${this.apiUrl}/reset-password`, {
-            token: this.token,
-            newPassword: this.form.value.newPassword
-        }).subscribe({
-            next: () => {
-                this.resetSuccess = true;
-                this.isSubmitting = false;
-            },
-            error: (err) => {
-                this.errorMessage = err.error?.message || 'An error occurred. Please try again.';
-                if (this.errorMessage.includes('Invalid') || this.errorMessage.includes('expired')) {
-                    this.invalidToken = true;
-                }
-                this.isSubmitting = false;
-            }
-        });
-    }
+        this.isSubmitting = false;
+      }
+    });
+  }
 }

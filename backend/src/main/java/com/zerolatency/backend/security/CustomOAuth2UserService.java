@@ -10,14 +10,14 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import com.zerolatency.backend.model.AuthProvider;
-import com.zerolatency.backend.model.users;
-import com.zerolatency.backend.repo.usersRepo;
+import com.zerolatency.backend.model.User;
+import com.zerolatency.backend.repo.UserRepo;
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
     @Autowired
-    private usersRepo userRepository;   
+    private UserRepo userRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
@@ -52,11 +52,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         }
 
         // Check if user exists
-        users user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
 
         if (user == null) {
             // Create new user
-            user = new users();
+            user = new User();
             user.setEmail(email);
             user.setUsername(name != null ? name : email.split("@")[0]);
             user.setProvider("google".equals(registrationId) ? AuthProvider.GOOGLE : AuthProvider.GITHUB);
@@ -64,7 +64,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
             user.setProfilePicture(picture);
             user.setEnabled(true);
             user.setRole("USER");
-            // No password for OAuth users
+            // No password for OAuth User
             user.setPassword(null);
         } else {
             // Update existing user

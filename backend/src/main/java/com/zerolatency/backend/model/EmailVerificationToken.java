@@ -16,7 +16,7 @@ public class EmailVerificationToken {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private users user;
+    private User user;
 
     @Column(nullable = false)
     private LocalDateTime expiresAt;
@@ -28,7 +28,7 @@ public class EmailVerificationToken {
         this.createdAt = LocalDateTime.now();
     }
 
-    public EmailVerificationToken(String token, users user, LocalDateTime expiresAt) {
+    public EmailVerificationToken(String token, User user, LocalDateTime expiresAt) {
         this();
         this.token = token;
         this.user = user;
@@ -52,11 +52,11 @@ public class EmailVerificationToken {
         this.token = token;
     }
 
-    public users getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(users user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

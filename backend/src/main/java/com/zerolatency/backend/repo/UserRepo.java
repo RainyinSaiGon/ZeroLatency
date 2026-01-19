@@ -2,14 +2,14 @@ package com.zerolatency.backend.repo;
 
 import org.springframework.stereotype.Repository;
 
-import com.zerolatency.backend.model.users;
+import com.zerolatency.backend.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 @Repository
-public interface usersRepo extends JpaRepository<users, Long> {
-    public users findByUsername(String username);
+public interface UserRepo extends JpaRepository<User, Long> {
+    public User findByUsername(String username);
 
-    public users findByEmail(String email);
+    public User findByEmail(String email);
 
     public Boolean existsByUsername(String username);
 

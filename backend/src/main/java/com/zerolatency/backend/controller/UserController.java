@@ -13,12 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.zerolatency.backend.dto.RegisterRequest;
-import com.zerolatency.backend.dto.authResponse;
-import com.zerolatency.backend.dto.loginRequest;
-import com.zerolatency.backend.dto.usernameRequest;
+import com.zerolatency.backend.dto.AuthResponse;
+import com.zerolatency.backend.dto.LoginRequest;
+import com.zerolatency.backend.dto.UsernameRequest;
 import com.zerolatency.backend.dto.UserDTO;
-import com.zerolatency.backend.model.users;
-import com.zerolatency.backend.service.usersService;
+import com.zerolatency.backend.model.User;
+import com.zerolatency.backend.service.UserService;
 import com.zerolatency.backend.service.TwoFactorService;
 
 import java.util.HashMap;
@@ -28,22 +28,22 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/users")
 @CrossOrigin(origins = "http://localhost:4200")
-public class usersController {
+public class UserController {
     @Autowired
-    private usersService userService;
+    private UserService userService;
 
     @Autowired
     private TwoFactorService twoFactorService;
 
     @GetMapping
     public UserDTO findByUsername(@RequestParam String username) {
-        users user = userService.findByUsername(username);
+        User user = userService.findByUsername(username);
         return userService.toUserDTO(user);
     }
 
     @PostMapping
-    public UserDTO findByUsernameFromBody(@RequestBody usernameRequest user) {
-        users foundUser = userService.findByUsername(user.getUsername());
+    public UserDTO findByUsernameFromBody(@RequestBody UsernameRequest user) {
+        User foundUser = userService.findByUsername(user.getUsername());
         return userService.toUserDTO(foundUser);
     }
 
@@ -55,15 +55,15 @@ public class usersController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody loginRequest request) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
-            users user = userService.login(request.getUsername(), request.getPassword());
+            User user = userService.login(request.getUsername(), request.getPassword());
             if (user != null) {
                 // Generate JWT token
                 String token = userService.generateToken(user.getUsername());
                 Long expiresAt = System.currentTimeMillis() + userService.getTokenExpiration();
 
-                authResponse response = new authResponse(token, expiresAt, userService.toUserDTO(user));
+                AuthResponse response = new AuthResponse(token, expiresAt, userService.toUserDTO(user));
                 return ResponseEntity.ok(response);
             }
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -77,7 +77,7 @@ public class usersController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
-            users user = userService.register(
+            User user = userService.register(
                     request.getUsername(),
                     request.getEmail(),
                     request.getPassword());
@@ -86,7 +86,7 @@ public class usersController {
             String token = userService.generateToken(user.getUsername());
             Long expiresAt = System.currentTimeMillis() + userService.getTokenExpiration();
 
-            authResponse response = new authResponse(token, expiresAt, userService.toUserDTO(user));
+            AuthResponse response = new AuthResponse(token, expiresAt, userService.toUserDTO(user));
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -208,8 +208,8 @@ public class usersController {
             String newToken = userService.generateToken(username);
             Long expiresAt = System.currentTimeMillis() + userService.getTokenExpiration();
 
-            users user = userService.findByUsername(username);
-            authResponse response = new authResponse(newToken, expiresAt, userService.toUserDTO(user));
+            User user = userService.findByUsername(username);
+            AuthResponse response = new AuthResponse(newToken, expiresAt, userService.toUserDTO(user));
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -223,7 +223,7 @@ public class usersController {
         try {
             String token = authHeader.substring(7);
             String username = userService.getUsernameFromToken(token);
-            users user = userService.findByUsername(username);
+            User user = userService.findByUsername(username);
 
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
@@ -257,7 +257,7 @@ public class usersController {
         try {
             String token = authHeader.substring(7);
             String username = userService.getUsernameFromToken(token);
-            users user = userService.findByUsername(username);
+            User user = userService.findByUsername(username);
 
             if (user == null || user.getTwoFactorSecret() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -289,7 +289,7 @@ public class usersController {
             String username = request.get("username");
             String code = request.get("code");
 
-            users user = userService.findByUsername(username);
+            User user = userService.findByUsername(username);
             if (user == null || !user.getTwoFactorEnabled()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(createErrorResponse("2FA not enabled for this user"));
@@ -318,7 +318,7 @@ public class usersController {
             String jwtToken = userService.generateToken(username);
             Long expiresAt = System.currentTimeMillis() + userService.getTokenExpiration();
 
-            authResponse response = new authResponse(jwtToken, expiresAt, userService.toUserDTO(user));
+            AuthResponse response = new AuthResponse(jwtToken, expiresAt, userService.toUserDTO(user));
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -332,7 +332,7 @@ public class usersController {
         try {
             String token = authHeader.substring(7);
             String username = userService.getUsernameFromToken(token);
-            users user = userService.findByUsername(username);
+            User user = userService.findByUsername(username);
 
             if (user == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
